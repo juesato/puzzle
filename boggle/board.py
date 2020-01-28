@@ -50,7 +50,7 @@ class Board:
         return str(output)
 
 
-FILLER_LETTER = 'Z'
+FILLER_LETTER = ' '
 
 
 class HexBoard:
@@ -67,29 +67,50 @@ class HexBoard:
         self.num_rows = len(row_letters)
         assert len(row_letters) == len(row_starts)
         self.num_cols = max([
-            row_starts[i] + 2 * (len(row_letters[i]) - 1)
-            for i in range(row_starts)
+            row_starts[i] + 2 * (len(row_letters[i]) - 1) + 1
+            for i in range(len(row_starts))
         ])
         self._letters = []
-        for _ in self.num_rows:
-            self._letters.append(FILLER_LETTER * self.num_cols)
+        self._neighbours = []
+        for r in range(self.num_rows):
+            self._letters.append([])
+            self._neighbours.append([])
+            for _ in range(self.num_cols):
+                self._letters[r].append(FILLER_LETTER)
+                self._neighbours[r].append([])
 
         for i, letters in enumerate(row_letters):
             col = row_starts[i]
             for j, c in enumerate(letters):
                 self._letters[i][col] = c
+                self._neighbours[i][col] = self._calc_neighbours(col, i)
                 col += 2
 
         self.num_cols = max([len(s) for s in self._letters])
 
-    def _calc_neighbors(self):
-        pass
+    def _in_bounds(self, col, row):
+        return 0 <= row < self.num_rows and 0 <= col < self.num_cols
+
+    def _calc_neighbours(self, col, row):
+        neighbours = []
+        row_col_offsets = [(-1, -1), (-1, 1), (0, -2), (0, 2), (1, -1), (1, 1)]        
+        for offset in row_col_offsets:
+            new_idx = (row + offset[0], col + offset[1])
+            if self._in_bounds(*new_idx):
+                neighbours.append(new_idx)
+        return neighbours
 
     def get_neighbours(self, col, row):
-        return self._neighbours[col][row]
-
-    def get_neighbors(self, col, row):
-        pass
+        return self._neighbours[row][col]
 
     def get_letter(self, col, row):
         return self._letters[row][col]
+
+    def __str__(self):
+        s = ''
+        print(self._letters)
+        for row in range(self.num_rows):
+            for col in range(self.num_cols):
+                s += self._letters[row][col]
+            s += '\n'
+        return 'HexBoard:\n' + s

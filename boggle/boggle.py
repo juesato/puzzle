@@ -4,7 +4,7 @@ import signal
 import os
 
 from trie import Trie
-from board import Board
+from board import Board, HexBoard
 from cubes import Cubes
 from board_search import board_search
 from answers import Answers
@@ -49,18 +49,49 @@ def show_answers(trie, letters):
     print board
     print answers
 
+
+def show_answers_hex(trie, input_str):
+    row_letters, row_starts = parse_letters_hex(input_str)
+    board = HexBoard(row_letters, row_starts)
+    print board
+
+    results = board_search(board, trie)
+
+    answers = Answers()
+    answers.add(results)
+
+    print answers
+
+
+def parse_letters_hex(s):
+    # Format example:
+    # 1:WORD,ABC,WORD,DEF
+    start_offset, s = s.split(':')
+    words = s.split(',')
+    row_starts = []
+    offset = int(start_offset)
+    for i in range(len(words)):
+        row_starts.append(offset)
+        offset = 0 if offset else 1
+    return words, row_starts
+
+
 if __name__ == '__main__':
     print 'Loading word list, please wait...'
     trie = Trie()
-    for w in open('resources/words.txt').readlines():
+    # path = 'resources/words.txt'
+    # path = 'resources/words_short.txt'
+    path = '/home/juesato/code/puzzle/dictionaries/wikipedia_titles.txt'
+    for w in open(path).readlines():
         word = w.strip()
         if len(word) > 2:
             trie.add(word.upper())
 
     if len(sys.argv) > 1:
         # Convert the command-line argument into a list of lists of letters
-        letters = map(list, sys.argv[1].upper().split(' '))
-        show_answers(trie, letters)
+        # letters = map(list, sys.argv[1].upper().split(' '))
+        # show_answers(trie, letters)
+        show_answers_hex(trie, sys.argv[1].upper())
     else:
         play_game(trie)
 
