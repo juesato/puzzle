@@ -18,8 +18,8 @@ def board_search(board, word_trie):
 
                     _search(neighbour_position, child_node, visited_positions + [neighbour_position])
 
-    for c in range(0, board.size):
-        for r in range(0, board.size):
+    for c in range(0, board.num_cols):
+        for r in range(0, board.num_rows):
             _search((c, r), word_trie.root, [])
 
     return results
